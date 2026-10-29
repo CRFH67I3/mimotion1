@@ -1,8 +1,8 @@
 name: 刷步数
 
 on:
-  schedule:
-    - cron: '33 1,4,6,9,11,14 * * *'
+  # 定时触发由外部调度器调用 workflow_dispatch API 完成
+  # （GitHub schedule 在本账号下始终不触发，见 README 说明）
   workflow_dispatch:
 
 jobs:
@@ -37,5 +37,5 @@ jobs:
           git config user.name github-actions
           git config user.email github-actions@users.noreply.github.com
           git add .
-          git commit -m "persist tokens trigger by ${{ github.event_name }}"
+          git commit -m "persist tokens trigger by ${{ github.event_name }}" || echo "没有变更，跳过提交"
           git push origin master
