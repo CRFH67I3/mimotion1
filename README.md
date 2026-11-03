@@ -5,6 +5,14 @@
 [![GitHub stars](https://img.shields.io/github/stars/TonyJiangWJ/mimotion?style=flat-square)](https://github.com/TonyJiangWJ/mimotion/stargazers)
 [![GitHub issues](https://img.shields.io/github/issues/TonyJiangWJ/mimotion?style=flat-square)](https://github.com/TonyJiangWJ/mimotion/issues)
 
+> ### 本仓库来源
+>
+> 本仓库 **Fork 自 [TonyJiangWJ/mimotion](https://github.com/TonyJiangWJ/mimotion)**，原作者 [TonyJiangWJ](https://github.com/TonyJiangWJ)，
+> 感谢上游长期维护。刷步数的核心逻辑（`main.py`、`util/zepp_helper.py` 等）保持上游原样，
+> 本仓库只做了少量本地化改动：新增钉钉推送、去掉 GitHub `schedule` 改为外部调度触发（清单见文末「本仓库说明」）。
+>
+> 上游有新提交时如何同步，见文末 **同步上游更新** 一节。
+
 ## 小米运动自动刷步数（支持邮箱登录）
 
 - 小米运动自动刷步数，小米运动APP现已改名 `Zepp Life`，为方便说明，后面还是称其为小米运动。但下载注册时请搜索 `Zepp Life`。
@@ -280,4 +288,59 @@ pip install -r requirements.txt
 执行脚本修改步数
 ```shell
 python3 main.py
+```
+
+## 本仓库说明（Fork 自 TonyJiangWJ/mimotion）
+
+- **上游项目**：<https://github.com/TonyJiangWJ/mimotion>（作者 [TonyJiangWJ](https://github.com/TonyJiangWJ)）
+- **本仓库**：<https://github.com/CRFH67I3/mimotion1>，由上游 Fork 而来，不是独立项目
+- **Fork 基线**：`4659d19`（2026-10-28）；**最近一次上游同步**：`f6e1407`（2026-11-03）
+- 上游使用 MIT 协议，本仓库沿用同一协议，版权归原作者所有
+
+### 本仓库相对上游的改动
+
+只改了「运行方式」和「通知」，**刷步数核心逻辑未动**：
+
+| 文件 | 改动 |
+| --- | --- |
+| `util/push_util.py` | 新增钉钉群自定义机器人推送（支持"加签"），其余推送渠道保持上游实现 |
+| `main.py` | 只多读 `DINGTALK_WEBHOOK_TOKEN` / `DINGTALK_SECRET` 两个环境变量并透传给推送模块 |
+| `.env.example`、`README.md` | 补充钉钉相关配置说明 |
+| `.github/workflows/run.yml` | 移除 `on.schedule` 定时触发，改为外部调度器调用 `workflow_dispatch`（本账号下 GitHub schedule 长期不触发或延迟数小时） |
+| `.gitignore` | 追加 `.workbuddy/` |
+| `encrypted_tokens.data` | 本仓库自己账号的加密 token，与上游不通用 |
+
+**未改动**：`util/zepp_helper.py`、`util/aes_help.py`、`local/decrypt_data.py`、`cron_convert.sh`、`inspect_configs.py`、`requirements.txt`、`.github/workflows/{cron,star,inspect_configs}.yml`。
+
+### 同步上游更新
+
+上游每天都会产生 `persist tokens` / `random cron trigger` 这类 Actions 自动提交，所以"落后 N 个提交"里绝大多数是噪音，**代码文件通常没有变化**。
+
+```shell
+# 首次：添加上游远端
+git remote add upstream https://github.com/TonyJiangWJ/mimotion.git
+
+# 之后每次同步
+git fetch upstream master
+git merge upstream/master
+```
+
+冲突固定只出现在以下三个文件，一律**保留本仓库版本**：
+
+```shell
+git checkout --ours -- .github/workflows/run.yml cron_change_time encrypted_tokens.data
+git add .github/workflows/run.yml cron_change_time encrypted_tokens.data
+git commit
+```
+
+原因：
+
+- `run.yml`：本仓库要的是「外部调度 + `workflow_dispatch`」，上游改的是它自己的 cron 时间
+- `cron_change_time`：上游 cron 的运行日志，与本仓库调度方式无关
+- `encrypted_tokens.data`：各自账号的加密 token，混用会直接报错
+
+合并前建议先确认上游到底改了什么，只有 `main.py` / `util/` 出现在下面输出里才需要认真对待：
+
+```shell
+git diff --stat $(git merge-base HEAD upstream/master) upstream/master
 ```
