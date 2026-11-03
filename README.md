@@ -325,6 +325,13 @@ git fetch upstream master
 git merge upstream/master
 ```
 
+> **直连 GitHub 推送超时时**（本机 `github.com:443` 常被重置），可临时用镜像前缀推送，凭据仍是 GitHub 账号 + PAT：
+>
+> ```shell
+> git push https://ghfast.top/https://github.com/CRFH67I3/mimotion1.git master
+> git fetch https://ghfast.top/https://github.com/TonyJiangWJ/mimotion.git master:refs/remotes/upstream/master
+> ```
+
 冲突固定只出现在以下三个文件，一律**保留本仓库版本**：
 
 ```shell
