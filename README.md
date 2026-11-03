@@ -325,11 +325,26 @@ git fetch upstream master
 git merge upstream/master
 ```
 
-> **直连 GitHub 推送超时时**（本机 `github.com:443` 常被重置），可临时用镜像前缀推送，凭据仍是 GitHub 账号 + PAT：
+> **直连 GitHub 超时时**（本机 `github.com:443` 常被重置 `Empty reply from server`）：
 >
 > ```shell
-> git push https://ghfast.top/https://github.com/CRFH67I3/mimotion1.git master
+> # 只需配一次：镜像远端，凭据仍用 GitHub 账号 + PAT
+> git remote add mirror https://ghproxy.net/https://github.com/CRFH67I3/mimotion1.git
+>
+> # 之后推送
+> git push mirror master
+>
+> # 拉上游也走镜像
 > git fetch https://ghfast.top/https://github.com/TonyJiangWJ/mimotion.git master:refs/remotes/upstream/master
+> ```
+>
+> 注意：`ghfast.top` 会缓存 `info/refs`，连续推送可能报 `cannot lock ref ... expected <旧 sha>`，此时换 `ghproxy.net` 即可。<br>
+> 若弹出 Git Credential Manager 询问 `ghfast.top` / `ghproxy.net` 的账号密码，说明该域名还没绑定 GitHub 凭据，把凭据映射过去就不再询问：
+>
+> ```shell
+> H='!f() { [ "$1" = "get" ] && printf "protocol=https\nhost=github.com\n\n" | git credential fill; }; f'
+> git config --global credential.https://ghproxy.net.helper "$H"
+> git config --global credential.https://ghfast.top.helper "$H"
 > ```
 
 冲突固定只出现在以下三个文件，一律**保留本仓库版本**：
