@@ -346,6 +346,8 @@ git merge upstream/master
 > git config --global credential.https://ghproxy.net.helper "$H"
 > git config --global credential.https://ghfast.top.helper "$H"
 > ```
+>
+> 本仓库 `master` 每跑一次 Actions 就会多出 `persist tokens` 提交，推送前先同步：`git pull mirror master`（`encrypted_tokens.data` 冲突时取远端版本）。
 
 冲突固定只出现在以下三个文件，一律**保留本仓库版本**：
 
